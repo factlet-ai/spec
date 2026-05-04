@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://factlet.ai/schema/v1.0/factbook.schema.json",
+  "title": "Factbook",
+  "description": "A packaged FactMap, versioned and portable. Conforms to Factlet Protocol v0.1 §5.",
+  "type": "object",
+  "required": ["schema_version", "content"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "The Factbook protocol version. For Factlet Protocol v0.1, MUST be 'v1.0'.",
+      "const": "v1.0"
+    },
+    "last_updated": {
+      "type": "string",
+      "description": "ISO 8601 timestamp of the most recent modification.",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Free-form Factbook-level metadata.",
+      "additionalProperties": true,
+      "properties": {
+        "name":        { "type": "string" },
+        "owner":       { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "content": {
+      "type": "array",
+      "description": "The factlet records.",
+      "items": { "$ref": "factlet.schema.json" }
+    }
+  }
+}
