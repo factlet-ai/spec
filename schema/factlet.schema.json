@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://factlet.ai/schema/v1.0/factlet.schema.json",
+  "title": "Factlet",
+  "description": "One atomic, source-cited truth about private information. Conforms to Factlet Protocol v0.1 §3.",
+  "type": "object",
+  "required": ["id", "statement", "confidence", "sources"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable identifier, unique within a Factbook. Conventionally f### (e.g. f001). MUST be immutable once published.",
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "statement": {
+      "type": "string",
+      "description": "The factlet text. SHOULD be a single declarative sentence.",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Producer's confidence the statement is true.",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "sources": {
+      "type": "array",
+      "description": "Provenance pointers (file:line, commit hash, URL, document path, incident ID).",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "tags": {
+      "type": "array",
+      "description": "Free-form tags for filtering and grouping.",
+      "items": { "type": "string", "minLength": 1, "maxLength": 64 },
+      "uniqueItems": true
+    },
+    "scope_level": {
+      "type": "string",
+      "description": "Breadth of applicability.",
+      "enum": ["team", "project", "feature", "personal"]
+    },
+    "supersedes": {
+      "type": "array",
+      "description": "IDs of older factlets this one replaces. The superseded factlets MUST be marked archived: true.",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "merged_into": {
+      "type": "string",
+      "description": "If this factlet was merged into another, the target ID."
+    },
+    "archived": {
+      "type": "boolean",
+      "description": "If true, the factlet is no longer authoritative.",
+      "default": false
+    },
+    "archived_reason": {
+      "type": "string",
+      "description": "Free-form reason for archiving."
+    },
+    "retired_at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp when the factlet was archived.",
+      "format": "date-time"
+    },
+    "extension": {
+      "type": "object",
+      "description": "Vendor-specific fields. Implementations MUST ignore unknown keys.",
+      "additionalProperties": true
+    }
+  }
+}
