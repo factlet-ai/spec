@@ -1,30 +1,33 @@
 # Factlet Protocol — specification
 
-Open specification for portable, vendor-neutral AI grounding. Read the full protocol at [factlet.ai/protocol](https://factlet.ai/protocol).
+Open specification for portable, vendor-neutral AI grounding. The five-primitive protocol (factlet, FactMap, Factbook, FactSignal, low-FactSignal warning) defines how private team knowledge flows into LLM answers and how to measure when grounding coverage runs out.
+
+## Read the spec
+
+- **[SPEC.md](SPEC.md)** — the v0.1 specification (RFC 2119 normative language, ~14 sections)
+- **[schema/factlet.schema.json](schema/factlet.schema.json)** — JSON Schema for individual factlet records
+- **[schema/factbook.schema.json](schema/factbook.schema.json)** — JSON Schema for the Factbook container
+- **[examples/payments-factbook.yaml](examples/payments-factbook.yaml)** — complete worked example
+
+## Contribute
+
+- **Discussion / question** → open a [GitHub Discussion](https://github.com/factlet-ai/spec/discussions)
+- **Substantive change** (new field, new primitive, breaking schema) → open an RFC PR using [rfcs/0000-template.md](rfcs/0000-template.md)
+- **Spec text typo or ambiguity** → open an Issue with section number and proposed clarification
+- **Security issue** → see [SECURITY.md](SECURITY.md), do not open a public issue
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full RFC process.
 
 ## Status
 
-**v0.1 draft.** Open RFC process — see [Discussions](https://github.com/factlet-ai/spec/discussions) for active proposals and [`rfcs/`](rfcs/) for accepted RFCs. v0.2 ships within 90 days incorporating feedback.
+**v0.1 draft.** v0.2 ships within 90 days incorporating community feedback. Pre-v1.0 minor versions MAY include breaking changes; after v1.0, breaking changes require a major version bump.
 
-## Scope
+## Related repositories
 
-The five-primitive protocol:
-
-- **Factlet** — one atomic truth about your private information
-- **FactMap** — the structured collection of factlets covering one body of work
-- **Factbook** — a packaged FactMap, versioned and portable
-- **FactSignal** — coverage strength at a query, measured in bars (0-5)
-- **Low-FactSignal warning** — runtime callback when a model is about to answer in a dead zone
-
-This repository contains the specification text, JSON Schema, and the RFC change log. Implementations live in [`factlet-ai/reference-sdk`](https://github.com/factlet-ai/reference-sdk). Example factbooks live in [`factlet-ai/registry`](https://github.com/factlet-ai/registry).
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the RFC process. All participation requires adherence to the [Code of Conduct](CODE_OF_CONDUCT.md).
-
-## Security
-
-Vulnerability disclosure: see [SECURITY.md](SECURITY.md).
+- **[factlet-ai/reference-sdk](https://github.com/factlet-ai/reference-sdk)** — reference implementations in Python and TypeScript
+- **[factlet-ai/registry](https://github.com/factlet-ai/registry)** — community-contributed example Factbooks across domains
+- **[factlet.ai](https://factlet.ai)** — website + getting-started prompts
+- **[factlet.ai/llms.txt](https://factlet.ai/llms.txt)** — LLM-discovery file
 
 ## License
 
