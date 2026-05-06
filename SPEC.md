@@ -36,7 +36,7 @@ A factlet **MUST** be representable as a YAML or JSON object with the following 
 
 | Field        | Type    | Description |
 |--------------|---------|-------------|
-| `id`         | string  | Stable identifier, unique within a Factbook. Conventionally `f###` (e.g. `f001`). MUST be immutable once published. |
+| `id`         | string  | Stable identifier, unique within a Factbook. Conventionally `f###` (e.g. `f001`). MUST be immutable once published. **In v0.2 (per [RFC-001](rfcs/0001-scoped-fact-ids.md))**, external references MUST use the scoped form `<scope>:<id>` (e.g. `factlet-ai:f001`); bare IDs remain valid INSIDE the host Factbook because the file-level `scope:` field provides the prefix. |
 | `statement`  | string  | The factlet text. SHOULD be a single declarative sentence. |
 | `confidence` | float   | Producer's confidence the statement is true, in `[0.0, 1.0]`. |
 | `sources`    | list[string] | One or more provenance pointers (file:line, commit hash, URL, document path, incident ID). MUST be non-empty. |
