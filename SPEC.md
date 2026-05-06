@@ -215,4 +215,4 @@ To propose an RFC, see [CONTRIBUTING.md](CONTRIBUTING.md) and the [RFC template]
 
 ## 14. Acknowledgments
 
-This protocol borrows the open-spec / reference-implementation pattern from the Model Context Protocol (MCP). Naming conventions for `factlet` and `FactSignal` were locked after a vocabulary review against existing terms in the AI grounding literature; see the locked vocabulary tenet in the [Kernora factbook](https://github.com/kernora-ai/nora).
+This protocol borrows the open-spec / reference-implementation pattern from the Model Context Protocol (MCP). Naming conventions for `factlet` and `FactSignal` were locked after a vocabulary review against existing terms in the AI grounding literature.
