@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://factlet.ai/schema/profiles/manufacturing/v0.1/factlet.schema.json",
+  "title": "Manufacturing Profile — Factlet schema additions",
+  "description": "Profile-OVERLAY schema. Validates manufacturing-profile field additions only; MUST be composed with the base factlet schema (id, statement, confidence, sources) for a complete factlet validation. Standalone-validating with this schema alone will accept factlets missing required base fields.",
+  "type": "object",
+  "properties": {
+    "mfg_scope": {
+      "type": "string",
+      "enum": ["enterprise", "site", "area", "line", "cell", "unit", "asset"],
+      "description": "ISA-95 / B2MML aligned spatial scope. Hierarchy: enterprise ⊃ site ⊃ area ⊃ line ⊃ cell ⊃ unit ⊃ asset."
+    },
+    "enterprise_id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,62}[a-z0-9]$|^[a-z]$" },
+    "site_id":       { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,62}[a-z0-9]$|^[a-z]$" },
+    "area_id":       { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,62}[a-z0-9]$|^[a-z]$" },
+    "line_id":       { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,62}[a-z0-9]$|^[a-z]$" },
+    "cell_id":       { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,62}[a-z0-9]$|^[a-z]$" },
+    "unit_id":       { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,62}[a-z0-9]$|^[a-z]$" },
+    "asset_id":      { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,62}[a-z0-9]$|^[a-z]$" },
+    "asset_phase": {
+      "type": "string",
+      "enum": ["fat", "sat", "commissioning", "operation", "maintenance", "decommissioning"],
+      "description": "Asset lifecycle phase. Omitted = phase-agnostic (relevant across the asset lifecycle)."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "permission_role": {
+      "type": "string",
+      "enum": ["operator", "maintainer", "engineer", "supervisor", "plant_manager", "enterprise"]
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO 8601 date after which factlet truth requires re-validation."
+    }
+  },
+  "required": ["mfg_scope"],
+  "allOf": [
+    { "if": { "properties": { "mfg_scope": { "const": "enterprise" } }, "required": ["mfg_scope"] },
+      "then": { "required": ["enterprise_id"] } },
+    { "if": { "properties": { "mfg_scope": { "const": "site" } }, "required": ["mfg_scope"] },
+      "then": { "required": ["site_id"] } },
+    { "if": { "properties": { "mfg_scope": { "const": "area" } }, "required": ["mfg_scope"] },
+      "then": { "required": ["site_id", "area_id"] } },
+    { "if": { "properties": { "mfg_scope": { "const": "line" } }, "required": ["mfg_scope"] },
+      "then": { "required": ["site_id", "area_id", "line_id"] } },
+    { "if": { "properties": { "mfg_scope": { "const": "cell" } }, "required": ["mfg_scope"] },
+      "then": { "required": ["site_id", "area_id", "line_id", "cell_id"] } },
+    { "if": { "properties": { "mfg_scope": { "const": "unit" } }, "required": ["mfg_scope"] },
+      "then": { "required": ["site_id", "area_id", "line_id", "unit_id"] } },
+    { "if": { "properties": { "mfg_scope": { "const": "asset" } }, "required": ["mfg_scope"] },
+      "then": { "required": ["site_id", "area_id", "asset_id"],
+                "anyOf": [
+                  { "required": ["line_id"] },
+                  { "required": ["cell_id"] },
+                  { "required": ["unit_id"] }
+                ] } }
+  ]
+}

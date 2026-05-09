@@ -1,0 +1,385 @@
+schema_version: v1.0
+profile: manufacturing
+profile_version: "0.1"
+last_updated: 2026-05-09T00:00:00Z
+metadata:
+  name: specialty-chemicals-plant-2
+  scope: project:acme-plant-2-pa
+  description: |
+    Sanitized worked-example factbook for a fictional specialty-chemicals
+    plant. Demonstrates Manufacturing Profile v0.1 (RFC 0006):
+      - All seven mfg_scope levels (enterprise / site / area / line / cell
+        / unit / asset).
+      - All six asset_phase values (fat / sat / commissioning / operation
+        / maintenance / decommissioning).
+      - Safety vocabulary: severity, permission_role, valid_until.
+      - factlet_type extensions: hazard, alarm-correlation, vendor-quirk.
+      - Manufacturing source_type extensions in origination blocks.
+
+    The plant runs Sparkplug B + OPC UA Mode 3 over an Ignition Edge
+    integration layer, with three production lines: api-synthesis (line-1
+    with three reactor units R-1A/B/C and a dryer unit), compounding
+    (line-2 with two mixer units M-1/M-2 and dosing/compounding cells),
+    and qc-finishing (line-3).
+
+    Citation discipline (per RFC-001 in v0.2): bare ids (e.g. f001) are
+    valid INSIDE this file. External references MUST use the scoped form
+    project:acme-plant-2-pa:f001.
+
+content:
+
+  # ─── ENTERPRISE-LEVEL FACTLET ────────────────────────────────────────
+
+  - id: f001
+    statement: "Acme Specialty Chemicals enterprise-wide standard: AVEVA PI is the corporate historian-of-record. All site-level historian deployments (Ignition Tag History, OSIsoft local) MUST replicate to corporate PI within 24 hours for cross-site analytics and regulatory long-term retention."
+    confidence: 1.0
+    factlet_type: convention
+    sources:
+      - "ITARCH-2023-001 (Enterprise Architecture Decision Record)"
+    mfg_scope: enterprise
+    enterprise_id: acme-specialty-chemicals
+    asset_phase: operation
+    permission_role: engineer
+    tags: [enterprise, historian, pi, replication]
+    origination:
+      source_type: manual
+      authored_at: "2026-05-09T01:00:00Z"
+      authored_by: "human:alice@acme.example"
+      trust_prior: 0.95
+
+  # ─── SITE-LEVEL FACTLETS ─────────────────────────────────────────────
+
+  - id: f002
+    statement: "Plant OPC UA security policy: ALL clients/servers MUST use Mode 3 (Sign + Encrypt) with CertX-issued certificates. Mode 1 (None) and Mode 2 (Sign-only) are blocked at firewall."
+    confidence: 1.0
+    factlet_type: tenet
+    sources:
+      - "ISO 27001 audit finding ISO-2023-014"
+      - "Security Policy SEC-2024-002 §5.3"
+    mfg_scope: site
+    enterprise_id: acme-specialty-chemicals
+    site_id: acme-plant-2-pa
+    asset_phase: operation
+    permission_role: engineer
+    tags: [opcua, security, audit, iso-27001]
+
+  - id: f003
+    statement: "Plant-standard Sparkplug B topic structure: spBv1.0/{group_id}/{message_type}/{edge_node_id}/[device_id]. Group ID convention is a shortened plant code (acme-pa, max 8 chars) — NOT the full ISA-95 site_id, due to MQTT topic-length overhead. The mapping group_id=acme-pa → site_id=acme-plant-2-pa is documented in ARCH-2024-001."
+    confidence: 1.0
+    factlet_type: convention
+    sources:
+      - "ARCH-2024-001 (Plant architecture decision record)"
+      - "Sparkplug B v3.0 spec §5.1 (topic naming)"
+    mfg_scope: site
+    site_id: acme-plant-2-pa
+    # no asset_phase — phase-agnostic (the topic structure applies through the asset lifecycle)
+    tags: [sparkplug, mqtt, topic-convention]
+
+  - id: f004
+    statement: "Ignition Tag History retention is 90 days at full resolution, then 5-min averages for 2 years. For sub-second resolution beyond 90 days, query AVEVA PI Historian (independent retention: 7 years full)."
+    confidence: 0.95
+    factlet_type: convention
+    sources:
+      - "ARCH-2024-002 (Historian retention policy)"
+    mfg_scope: site
+    site_id: acme-plant-2-pa
+    asset_phase: operation
+    tags: [historian, retention, rca, ignition, pi]
+
+  # ─── AREA-LEVEL FACTLET ──────────────────────────────────────────────
+
+  - id: f005
+    statement: "API-synthesis area requires nitrogen-blanketed atmosphere on all open vessels (oxygen <2%) during catalyst handling and reactor charging."
+    confidence: 1.0
+    factlet_type: hazard
+    severity: high
+    sources:
+      - "Process Safety Information PSI-API-2023 §4"
+      - "OSHA PSM 29 CFR 1910.119"
+    mfg_scope: area
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    asset_phase: operation
+    permission_role: operator
+    tags: [safety, nitrogen-blanket, oxygen-limit, hazop]
+
+  # ─── LINE-LEVEL FACTLETS ─────────────────────────────────────────────
+
+  - id: f006
+    statement: "Line-1 reactor sequence is hard-coded R-1A → R-1B → R-1C, never parallel and never re-ordered. FDA-validated under our IND filing — changes require new validation work + filing amendment + 6-month review cycle."
+    confidence: 1.0
+    factlet_type: decision
+    sources:
+      - "FDA-IND-2018-validation-package §3.4"
+      - "Quality Manual QM-001 §7.2"
+    mfg_scope: line
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    line_id: line-1
+    asset_phase: operation
+    severity: high
+    permission_role: engineer
+    valid_until: "2027-06-30"  # 5-year cGMP re-validation cycle
+    tags: [fda, validation, reactor-sequence, cgmp, regulatory]
+
+  - id: f007
+    statement: "Line-2 product A→B changeover requires 2-hour minimum CIP cycle. Tested below 2hr in 2023 — caused cross-contamination flag on next batch."
+    confidence: 0.95
+    factlet_type: sop
+    sources:
+      - "CIP validation study 2023-Q4"
+      - "Cross-contamination incident CC-2023-006"
+    mfg_scope: line
+    site_id: acme-plant-2-pa
+    area_id: compounding
+    line_id: line-2
+    asset_phase: operation
+    permission_role: operator
+    tags: [cip, changeover, cross-contamination]
+
+  # ─── CELL-LEVEL FACTLET ──────────────────────────────────────────────
+
+  - id: f008
+    statement: "Dosing-Cell-2 batch sequence ALWAYS requires nitrogen purge of dosing lines before solvent dispense. Skipping caused 3 incidents in 2024 (one near-flash event 2024-09-22). Purge minimum 90 seconds."
+    confidence: 0.95
+    factlet_type: anti-pattern
+    severity: high
+    sources:
+      - "INC-2024-027 (near-flash event, 2024-09-22)"
+      - "INC-2024-014, INC-2024-019 (prior incidents same root cause)"
+    mfg_scope: cell
+    site_id: acme-plant-2-pa
+    area_id: compounding
+    line_id: line-2
+    cell_id: dosing-cell-2
+    asset_phase: operation
+    permission_role: operator
+    tags: [dosing, nitrogen-purge, anti-pattern, near-miss]
+
+  # ─── UNIT-LEVEL FACTLET (ISA-95 Part 2 equipment unit) ───────────────
+
+  - id: f009
+    statement: "Reactor R-1A jacket cooling lag is 4 minutes from setpoint change to actual jacket temperature response. Operators MUST NOT issue temperature setpoint changes faster than every 4 minutes — causes overshoot and risk of runaway exotherm. Applies to all heat-transfer-fluid loops on this unit."
+    confidence: 0.95
+    factlet_type: hazard
+    severity: high
+    sources:
+      - "PSV-Line1-2023 (Process Safety Verification, §R-1A thermal dynamics)"
+      - "HAZOP-2024-Q1 (scenario 14: thermal runaway)"
+    mfg_scope: unit
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    line_id: line-1
+    unit_id: r-1a
+    asset_phase: operation
+    permission_role: operator
+    tags: [reactor, thermal, hazop, exotherm, safety-critical]
+
+  # ─── ASSET-LEVEL FACTLETS ────────────────────────────────────────────
+
+  # Asset on a line (no intermediate cell or unit)
+  - id: f010
+    statement: "Pump-03 vibration trip threshold is 4.5 mm/s, NOT the OEM-published 5.5 mm/s. Adjusted after RCA-2024-08 + MOC-2024-019 — the change is operational gospel as of 2024-05-01."
+    confidence: 0.95
+    factlet_type: decision
+    sources:
+      - "RCA-2024-08 (Pump-03 catastrophic seal failure analysis)"
+      - "MOC-2024-019 (Management of Change approval, 2024-05-01)"
+    mfg_scope: asset
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    line_id: line-1
+    asset_id: pump-03
+    asset_phase: operation
+    permission_role: maintainer
+    tags: [pump, vibration, trip-threshold, rca-derived, moc]
+    origination:
+      source_type: cmms-export
+      source_ref: "SAP PM Notification 0010234567 (MOC-2024-019)"
+      authored_at: "2024-05-01T14:30:00Z"
+      authored_by: "human:carlos@acme.example"
+      trust_prior: 0.95
+
+  # Asset within a unit (asset-in-unit topology)
+  - id: f011
+    statement: "Reactor R-1A loop-tuning constants set during 2018-Q3 SAT: Kp=2.4, Ti=180s, Td=0. SAT-validated values supersede the FAT provisional values from FAT-R1A-2018-08."
+    confidence: 0.9
+    factlet_type: convention
+    sources:
+      - "SAT report SAT-R1A-2018-09"
+      - "Loop-tuning study LTS-2018-Q3"
+    mfg_scope: asset
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    line_id: line-1
+    unit_id: r-1a
+    asset_id: r-1a-temp-controller
+    asset_phase: sat
+    permission_role: engineer
+    tags: [pid-tuning, sat, loop-tuning]
+
+  # Asset in a cell (asset-in-cell topology)
+  - id: f012
+    statement: "Mixer-M2 must reach 75°C before catalyst addition. Below 75°C, the batch fails QC for residual unreacted monomer. Wait for jacket-temp stabilization indicator before proceeding."
+    confidence: 0.85
+    factlet_type: sop
+    sources:
+      - "Process Recipe RECIPE-CMP-007 v2.1"
+      - "QC failure trend analysis 2024-Q3"
+    mfg_scope: asset
+    site_id: acme-plant-2-pa
+    area_id: compounding
+    cell_id: compounding-cell-1
+    asset_id: m-2
+    asset_phase: operation
+    permission_role: operator
+    tags: [mixer, temperature, qc, catalyst]
+
+  # FAT-phase factlet
+  - id: f013
+    statement: "Reactor R-1A FAT (2018-08, vendor site Pfaudler PA): vendor-confirmed thermal rating up to 150°C jacket, 6 bar internal. FAT loop-tuning Kp=3.1 (provisional, superseded by SAT)."
+    confidence: 0.9
+    factlet_type: convention
+    sources:
+      - "FAT report FAT-R1A-2018-08 (Pfaudler witness signature)"
+    mfg_scope: asset
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    line_id: line-1
+    unit_id: r-1a
+    asset_id: r-1a-temp-controller
+    asset_phase: fat
+    permission_role: engineer
+    tags: [reactor, fat, vendor-witness]
+
+  # Commissioning-phase factlet
+  - id: f014
+    statement: "Reactor R-1A commissioning recipe-validation runs (2018-Q4): three back-to-back successful runs of RECIPE-API-001 required before operational handover. Documented in commissioning report COMM-R1A-2018-Q4."
+    confidence: 1.0
+    factlet_type: sop
+    sources:
+      - "COMM-R1A-2018-Q4"
+      - "Quality Manual QM-001 §commissioning"
+    mfg_scope: asset
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    line_id: line-1
+    unit_id: r-1a
+    asset_id: r-1a-temp-controller
+    asset_phase: commissioning
+    permission_role: engineer
+    tags: [commissioning, recipe-validation, handover]
+
+  # Maintenance-phase factlet
+  - id: f015
+    statement: "Pump-03 PM interval: ultrasonic bearing inspection every 90 days (CMMS work order auto-generated). After RCA-2024-08, oil sight-glass check added to every PM and to every restart-after-trip per OPS-TRAIN-2024-Q3."
+    confidence: 0.95
+    factlet_type: sop
+    sources:
+      - "PM schedule PM-PUMP-03"
+      - "OPS-TRAIN-2024-Q3"
+    mfg_scope: asset
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    line_id: line-1
+    asset_id: pump-03
+    asset_phase: maintenance
+    permission_role: maintainer
+    tags: [pm, pump, post-incident, training]
+    origination:
+      source_type: cmms-export
+      source_ref: "SAP PM PMSchedule PM-PUMP-03"
+      authored_at: "2024-09-15T08:00:00Z"
+      authored_by: "human:diego@acme.example"
+      trust_prior: 0.95
+
+  # Decommissioning-phase factlet
+  - id: f016
+    statement: "Reactor R-1A safe-shutdown sequence for decommissioning: nitrogen-purge to <0.5% O2 (90 min minimum), drain residual solvent to dedicated waste header (NOT main drain), document Cl-residual <50 ppm before removal. Hazardous waste manifest required per 40 CFR 262."
+    confidence: 1.0
+    factlet_type: sop
+    severity: critical
+    sources:
+      - "Decommissioning SOP DECOM-R1A-2024 (anticipated, draft for next outage)"
+      - "EPA RCRA waste manifest requirements 40 CFR 262"
+    mfg_scope: asset
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    line_id: line-1
+    unit_id: r-1a
+    asset_id: r-1a-vessel
+    asset_phase: decommissioning
+    permission_role: supervisor
+    tags: [decommissioning, safe-shutdown, rcra, regulatory]
+
+  # ─── ALARM-CORRELATION FACTLET ───────────────────────────────────────
+
+  - id: f017
+    statement: "ALARM CORRELATION: C-101 oil-mist alarm (TAG: C101-OM-AHH) firing within 90 seconds of Sparkplug NBIRTH publication is 87% predictive of compressor not having completed preheat. Treat as preheat-bypass; do NOT acknowledge until SOP-LINE1-007 verified."
+    confidence: 0.85
+    factlet_type: alarm-correlation
+    severity: medium
+    sources:
+      - "Alarm rationalization study 2024-Q3"
+      - "Historian query: 47 events 2023-2024 (Ignition Tag History)"
+    mfg_scope: asset
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    line_id: line-1
+    asset_id: c-101
+    asset_phase: operation
+    permission_role: maintainer
+    tags: [alarm, correlation, preheat-bypass, sparkplug, nbirth]
+    origination:
+      source_type: historian-extract
+      source_ref: "Ignition Tag History query 2024-Q3-alarm-correlation.sql"
+      authored_at: "2024-10-10T16:00:00Z"
+      authored_by: "human:priya@acme.example"
+      trust_prior: 0.9
+
+  # ─── VENDOR-QUIRK FACTLET (with valid_until) ─────────────────────────
+
+  - id: f018
+    statement: "Siemens S7-1500 PLC OPC UA server has a 100ms minimum sample interval — cannot be configured faster despite the OPC UA spec allowing it. For sub-100ms data, use the PROFINET I/O direct path or add an Ignition Edge gateway with native OPC UA pull at 50ms. Tracked vendor ticket SIEMENS-2024-0421; expected fix in TIA Portal V19."
+    confidence: 0.95
+    factlet_type: vendor-quirk
+    severity: medium
+    sources:
+      - "Siemens TIA Portal V18 Release Notes §OPC UA Server"
+      - "Vendor support ticket SIEMENS-2024-0421"
+    mfg_scope: site
+    site_id: acme-plant-2-pa
+    asset_phase: operation
+    permission_role: engineer
+    valid_until: "2026-12-31"  # expected V19 release window
+    tags: [siemens, opcua, sample-rate, vendor-quirk]
+    origination:
+      source_type: plc-tag-config
+      source_ref: "TIA Portal V18 export 2024-11-tia-portal-export.zip"
+      authored_at: "2024-11-15T10:00:00Z"
+      authored_by: "human:carlos@acme.example"
+      trust_prior: 0.9
+
+  # ─── OPC-UA-SOURCED FACTLET (test-fixture coverage for source_type: opc-ua-server) ─
+
+  - id: f019
+    statement: "Live OPC UA browse of S7-1500 PLC at api-synthesis line-1 confirms tag PLC1.R1A.JacketTempPV publishes at 100ms minimum interval (matches f018 vendor quirk). Browse captured 2026-04-15."
+    confidence: 1.0
+    factlet_type: convention
+    sources:
+      - "OPC UA browse export plc1-r1a-browse-2026-04-15.json"
+    mfg_scope: unit
+    site_id: acme-plant-2-pa
+    area_id: api-synthesis
+    line_id: line-1
+    unit_id: r-1a
+    asset_phase: operation
+    permission_role: engineer
+    related_factlets: [f018]
+    tags: [opcua, browse-extract, tag-discovery]
+    origination:
+      source_type: opc-ua-server
+      source_ref: "opc.tcp://plc1.acme-plant-2-pa.local:4840 (Mode 3)"
+      authored_at: "2026-04-15T14:30:00Z"
+      authored_by: "human:diego@acme.example"
+      trust_prior: 0.95
