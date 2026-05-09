@@ -5,6 +5,7 @@ Registered profiles known to the Factlet Protocol v0.2. Each profile defines dom
 | Profile | Status | Spec | RFC | Maintainer |
 |---|---|---|---|---|
 | [`software-engineering`](software-engineering/SPEC.md) | Stable (v0.2) | [SPEC.md](software-engineering/SPEC.md) | [RFC 0005](../rfcs/0005-software-profile-phase-enum.md) | factlet-ai/spec working group |
+| [`manufacturing`](manufacturing/SPEC.md) | Draft (v0.1) | [SPEC.md](manufacturing/SPEC.md) | [RFC 0006](../rfcs/0006-manufacturing-profile.md) | factlet-ai/spec working group |
 
 ## Adding a profile
 
