@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "<Profile Name> \u2014 Factlet schema additions",
+  "description": "Replace with your profile-specific factlet field constraints.",
+  "type": "object",
+  "properties": {}
+}

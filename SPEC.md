@@ -53,6 +53,8 @@ A factlet **MUST** be representable as a YAML or JSON object with the following 
 | `archived_reason` | string         | Free-form reason for archiving. |
 | `retired_at`      | string (date)  | ISO 8601 timestamp when the factlet was archived. |
 | `extension`       | object         | Vendor-specific fields. Implementations MUST ignore unknown keys. |
+| `origination`     | object         | **v0.2 ([RFC 0003](rfcs/0003-origination-provenance-block.md))** — provenance of the factlet RECORD itself (distinct from `sources`, which provides provenance for the underlying CLAIM). Sub-fields: `source_type` (enum: `manual` / `llm` / `import` / `forward-pass` / `reverse-pass` — extensible per profile), `source_ref` (free-form string, max 256 chars), `authored_at` (ISO 8601), `authored_by` (free-form string, max 256 chars), `trust_prior` (float in `[0.0, 1.0]`). |
+| `profile`         | string         | **v0.2 ([RFC 0002](rfcs/0002-profiles-mechanism.md))** — per-factlet profile override of the file-level profile. Used in cross-domain Factbooks. See §15. |
 
 ### 3.3 Example
 
@@ -85,10 +87,13 @@ A Factbook is a packaged Factbook **MUST** be a YAML or JSON document with the f
 
 | Field            | Type             | Required | Description |
 |------------------|------------------|----------|-------------|
-| `schema_version` | string           | Yes      | The Factbook protocol version. For this spec: `"v1.0"`. |
-| `last_updated`   | string (ISO 8601)| No       | When the Factbook was last modified. |
-| `metadata`       | object           | No       | Free-form Factbook-level metadata (name, owner, description). |
-| `content`        | list[factlet]    | Yes      | The factlet records, conforming to §3. |
+| `schema_version`  | string            | Yes      | The Factbook protocol version. For this spec: `"v1.0"`. |
+| `last_updated`    | string (ISO 8601) | No       | When the Factbook was last modified. |
+| `metadata`        | object            | No       | Free-form Factbook-level metadata (name, owner, description). |
+| `content`         | list[factlet]     | Yes      | The factlet records, conforming to §3. |
+| `profile`         | string            | No       | **v0.2 ([RFC 0002](rfcs/0002-profiles-mechanism.md))** — registered profile this Factbook is authored against (e.g. `software-engineering`). See §15. |
+| `profile_version` | string            | No       | **v0.2** — version of the profile schema this Factbook is authored against. |
+| `dependencies`    | object            | No       | **v0.2 ([RFC 0004](rfcs/0004-composable-factbooks-via-dependencies.md))** — composable-factbooks declaration. See §5.4. |
 
 ### 5.2 Versioning
 
@@ -109,6 +114,22 @@ content:
     sources: ["docs/payments-arch.md:42", "commit:abc123"]
     tags: [payments, architecture]
 ```
+
+### 5.4 Composable factbooks (v0.2 — RFC 0004)
+
+A Factbook MAY declare composition against other Factbooks via a top-level `dependencies.factbooks` list. Each entry has:
+
+| Field            | Type   | Required | Description |
+|------------------|--------|----------|-------------|
+| `id`             | string | Yes      | Scoped identifier of the dependency (e.g. `best-practices:python-3.12-2026`). |
+| `version`        | string | No       | Specific version. If absent, consumer SHOULD resolve to latest. |
+| `source`         | string | No       | URL or path to fetch the dependency. If absent, consumer relies on a registry resolver. |
+| `trust_prior`    | float  | No       | Override trust prior in `[0.0, 1.0]` for factlets pulled from this dependency. |
+| `retrieval_mode` | string | No       | `merged` (default) / `fallback` / `disabled`. |
+
+**Auto-fetch:** v0.2 readers SHOULD NOT auto-fetch dependencies from arbitrary URLs without explicit consumer consent (SSRF / supply-chain risk). Recommended pattern: a registered resolver the consumer configures explicitly. The reference SDK ships with no auto-fetch; consumers supply a resolver callback.
+
+**Cycle detection:** consumers MUST detect transitive cycles in the dependency graph and error / warn rather than recurse unbounded.
 
 ## 6. FactSignal
 
@@ -203,16 +224,58 @@ See the [`examples/`](examples/) directory for complete Factbooks across multipl
 
 ## 13. Open questions for v0.2
 
-These are explicitly unresolved in v0.1 and will be addressed via RFCs:
+These were explicitly unresolved in v0.1; status updated as v0.2 RFCs land:
 
-- Cross-Factbook references (when one team's factlet should reference another team's).
-- Factlet revocation semantics (vs supersession).
-- Multi-tenancy model for shared Factbooks.
-- Streaming retrieval API for very large Factbooks.
-- Standard FactSignal scoring algorithm (currently implementation-defined; may benchmark and recommend).
+- ~~Cross-Factbook references (when one team's factlet should reference another team's).~~ **Resolved by [RFC 0004](rfcs/0004-composable-factbooks-via-dependencies.md).**
+- ~~Domain-specific factlet vocabulary (software vs manufacturing vs healthcare).~~ **Resolved by [RFC 0002](rfcs/0002-profiles-mechanism.md) — Profiles mechanism.** First registered profile: software-engineering, see [RFC 0005](rfcs/0005-software-profile-phase-enum.md).
+- ~~Provenance of the factlet record itself (vs the underlying claim).~~ **Resolved by [RFC 0003](rfcs/0003-origination-provenance-block.md) — Origination block.**
+- Factlet revocation semantics (vs supersession). Open.
+- Multi-tenancy model for shared Factbooks. Open.
+- Streaming retrieval API for very large Factbooks. Open.
+- Standard FactSignal scoring algorithm (currently implementation-defined; may benchmark and recommend). Open.
 
 To propose an RFC, see [CONTRIBUTING.md](CONTRIBUTING.md) and the [RFC template](rfcs/0000-template.md).
 
 ## 14. Acknowledgments
 
 This protocol borrows the open-spec / reference-implementation pattern from the Model Context Protocol (MCP). Naming conventions for `factlet` and `FactSignal` were locked after a vocabulary review against existing terms in the AI grounding literature.
+
+## 15. Profiles (v0.2)
+
+The Profiles mechanism (ratified by [RFC 0002](rfcs/0002-profiles-mechanism.md)) is the canonical way to extend the protocol with domain-specific vocabulary without bloating the base spec. A Factbook MAY declare a `profile` at the file level (and individual factlets MAY override at record level). Each registered profile maintains its own schema extensions in `profiles/<name>/`.
+
+### 15.1 File-level fields
+
+A Factbook MAY include:
+
+| Field             | Type   | Description |
+|-------------------|--------|-------------|
+| `profile`         | string | Identifier of the registered profile this Factbook is authored against (e.g. `software-engineering`). |
+| `profile_version` | string | Version of the profile schema this Factbook is authored against. |
+
+If `profile` is omitted, the Factbook is interpreted as **profile-neutral** — only base-spec fields apply.
+
+### 15.2 Per-factlet override
+
+A factlet MAY include `profile: <name>` to override the file-level profile. Used for cross-domain Factbooks (e.g. an industrial-software project mixing `software-engineering` + `manufacturing` factlets).
+
+### 15.3 Conformance
+
+A v0.2 reader:
+1. MUST parse the `profile` and `profile_version` fields without error.
+2. MUST parse the per-factlet `profile` override.
+3. SHOULD apply profile-specific schema validation when it knows the named profile (its schema is installed or available).
+4. MUST treat profile-specific fields as unknown keys when it does not know the named profile (preserve on round-trip per v0.1 §9.3) and SHOULD emit a warning identifying the unknown profile.
+5. MUST NOT reject a Factbook on the basis of profile-specific fields the reader does not recognize.
+
+### 15.4 Registry
+
+Registered profiles are listed in [`profiles/REGISTRY.md`](profiles/REGISTRY.md). Each profile lives at `profiles/<name>/` with a `SPEC.md`, `factlet.schema.json`, optional `factbook.schema.json`, and `examples/`.
+
+Adding a profile requires a sub-RFC; see [`profiles/.template/`](profiles/.template/) for the starter template.
+
+### 15.5 Other v0.2 base-spec extensions
+
+In addition to Profiles, v0.2 ratifies two more universal extensions:
+- **`origination`** block on factlets (RFC 0003) — provenance of the YAML record itself, distinct from `sources` (provenance of the claim). See §3.2.
+- **`dependencies.factbooks`** at Factbook root (RFC 0004) — composition against other Factbooks. See §5.4.

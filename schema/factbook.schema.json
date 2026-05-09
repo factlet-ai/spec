@@ -2,9 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://factlet.ai/schema/v1.0/factbook.schema.json",
   "title": "Factbook",
-  "description": "A packaged FactMap, versioned and portable. Conforms to Factlet Protocol v0.1 §5.",
+  "description": "A packaged FactMap, versioned and portable. Conforms to Factlet Protocol v0.1 \u00a75.",
   "type": "object",
-  "required": ["schema_version", "content"],
+  "required": [
+    "schema_version",
+    "content"
+  ],
   "additionalProperties": false,
   "properties": {
     "schema_version": {
@@ -22,15 +25,77 @@
       "description": "Free-form Factbook-level metadata.",
       "additionalProperties": true,
       "properties": {
-        "name":        { "type": "string" },
-        "owner":       { "type": "string" },
-        "description": { "type": "string" }
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
       }
     },
     "content": {
       "type": "array",
       "description": "The factlet records.",
-      "items": { "$ref": "factlet.schema.json" }
+      "items": {
+        "$ref": "factlet.schema.json"
+      }
+    },
+    "profile": {
+      "type": "string",
+      "description": "v0.2 (RFC 0002) \u2014 registered profile this Factbook is authored against.",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "profile_version": {
+      "type": "string",
+      "description": "v0.2 \u2014 version of the profile schema this Factbook is authored against."
+    },
+    "dependencies": {
+      "type": "object",
+      "description": "v0.2 (RFC 0004) \u2014 composable-factbooks declaration.",
+      "properties": {
+        "factbooks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 256,
+                "pattern": "^[a-zA-Z0-9_:.-]+$",
+                "description": "Scoped identifier. No '/' or '..' (path-traversal blocked)."
+              },
+              "version": {
+                "type": "string",
+                "maxLength": 64
+              },
+              "source": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "trust_prior": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0
+              },
+              "retrieval_mode": {
+                "type": "string",
+                "enum": [
+                  "merged",
+                  "fallback",
+                  "disabled"
+                ],
+                "default": "merged"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

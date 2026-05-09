@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://factlet.ai/schema/profiles/software-engineering/v0.2/factlet.schema.json",
+  "title": "Software Engineering Profile \u2014 Factlet schema additions",
+  "description": "Profile-specific factlet field constraints layered on top of the base factlet schema.",
+  "type": "object",
+  "properties": {
+    "phase": {
+      "type": "string",
+      "enum": [
+        "design",
+        "implementation",
+        "testing",
+        "runtime"
+      ],
+      "description": "Software lifecycle phase. Omitted = phase-agnostic (relevant across phases)."
+    }
+  }
+}
