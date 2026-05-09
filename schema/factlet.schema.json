@@ -2,9 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://factlet.ai/schema/v1.0/factlet.schema.json",
   "title": "Factlet",
-  "description": "One atomic, source-cited truth about private information. Conforms to Factlet Protocol v0.1 §3.",
+  "description": "One atomic, source-cited truth about private information. Conforms to Factlet Protocol v0.1 \u00a73.",
   "type": "object",
-  "required": ["id", "statement", "confidence", "sources"],
+  "required": [
+    "id",
+    "statement",
+    "confidence",
+    "sources"
+  ],
   "additionalProperties": false,
   "properties": {
     "id": {
@@ -29,24 +34,38 @@
     "sources": {
       "type": "array",
       "description": "Provenance pointers (file:line, commit hash, URL, document path, incident ID).",
-      "items": { "type": "string", "minLength": 1 },
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
       "minItems": 1
     },
     "tags": {
       "type": "array",
       "description": "Free-form tags for filtering and grouping.",
-      "items": { "type": "string", "minLength": 1, "maxLength": 64 },
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      },
       "uniqueItems": true
     },
     "scope_level": {
       "type": "string",
       "description": "Breadth of applicability.",
-      "enum": ["team", "project", "feature", "personal"]
+      "enum": [
+        "team",
+        "project",
+        "feature",
+        "personal"
+      ]
     },
     "supersedes": {
       "type": "array",
       "description": "IDs of older factlets this one replaces. The superseded factlets MUST be marked archived: true.",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "uniqueItems": true
     },
     "merged_into": {
@@ -71,6 +90,52 @@
       "type": "object",
       "description": "Vendor-specific fields. Implementations MUST ignore unknown keys.",
       "additionalProperties": true
+    },
+    "profile": {
+      "type": "string",
+      "description": "v0.2 (RFC 0002) \u2014 per-factlet profile override. Profile name pattern: ^[a-z][a-z0-9-]{0,63}$ (no path traversal).",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "origination": {
+      "type": "object",
+      "description": "v0.2 (RFC 0003) \u2014 provenance of the factlet RECORD itself. Distinct from `sources` (provenance of the underlying claim).",
+      "required": [
+        "source_type"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "llm",
+            "import",
+            "forward-pass",
+            "reverse-pass"
+          ],
+          "description": "Producer type. Profile extensions may add domain-specific values; readers SHOULD warn on unknown values, not reject."
+        },
+        "source_ref": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Free-form pointer to the production event (commit hash, session ID, importer name+version)."
+        },
+        "authored_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the factlet record was created."
+        },
+        "authored_by": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Identifier for the producer."
+        },
+        "trust_prior": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Producer's prior trust level."
+        }
+      }
     }
   }
 }
