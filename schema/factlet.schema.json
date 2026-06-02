@@ -10,7 +10,7 @@
     "confidence",
     "sources"
   ],
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
     "id": {
       "type": "string",
@@ -105,14 +105,7 @@
       "properties": {
         "source_type": {
           "type": "string",
-          "enum": [
-            "manual",
-            "llm",
-            "import",
-            "forward-pass",
-            "reverse-pass"
-          ],
-          "description": "Producer type. Profile extensions may add domain-specific values; readers SHOULD warn on unknown values, not reject."
+          "description": "Producer type. Recommended values: manual, llm, import, forward-pass, reverse-pass. Profile extensions may add domain-specific values; readers SHOULD warn on unknown values, not reject (RFC 0013)."
         },
         "source_ref": {
           "type": "string",
