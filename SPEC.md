@@ -55,6 +55,9 @@ A factlet **MUST** be representable as a YAML or JSON object with the following 
 | `extension`       | object         | Vendor-specific fields. Implementations MUST ignore unknown keys. |
 | `origination`     | object         | **v0.2 ([RFC 0003](rfcs/0003-origination-provenance-block.md))** — provenance of the factlet RECORD itself (distinct from `sources`, which provides provenance for the underlying CLAIM). Sub-fields: `source_type` (enum: `manual` / `llm` / `import` / `forward-pass` / `reverse-pass` — extensible per profile), `source_ref` (free-form string, max 256 chars), `authored_at` (ISO 8601), `authored_by` (free-form string, max 256 chars), `trust_prior` (float in `[0.0, 1.0]`). |
 | `profile`         | string         | **v0.2 ([RFC 0002](rfcs/0002-profiles-mechanism.md))** — per-factlet profile override of the file-level profile. Used in cross-domain Factbooks. See §15. |
+| `rationale`       | string         | **v0.2 ([RFC 0010](rfcs/0010-rationale-alternatives.md))** — why the claim holds or why this choice was made (the intent the source artifacts structurally discard). |
+| `alternatives`    | list[object]   | **v0.2 ([RFC 0010](rfcs/0010-rationale-alternatives.md))** — options considered and rejected at decision time. Each entry: `summary` (REQUIRED), `rejected_because`, optional `ref` to a superseded factlet. Distinct from the supersession lineage (§15.5). |
+| `attribution`     | object         | **v0.2 ([RFC 0011](rfcs/0011-attribution.md))** — splits `produced_by` (`agent` REQUIRED, `kind`) — the agent that generated the claim — from `authority` (`owner`, `approved_by`, `approved_at`, `review_status`) — the role accountable for it being true. |
 
 ### 3.3 Example
 
@@ -276,6 +279,10 @@ Adding a profile requires a sub-RFC; see [`profiles/.template/`](profiles/.templ
 
 ### 15.5 Other v0.2 base-spec extensions
 
-In addition to Profiles, v0.2 ratifies two more universal extensions:
+In addition to Profiles, v0.2 ratifies these universal (base-spec) extensions:
 - **`origination`** block on factlets (RFC 0003) — provenance of the YAML record itself, distinct from `sources` (provenance of the claim). See §3.2.
 - **`dependencies.factbooks`** at Factbook root (RFC 0004) — composition against other Factbooks. See §5.4.
+- **`rationale`** + **`alternatives`** on factlets ([RFC 0010](rfcs/0010-rationale-alternatives.md)) — the intent-why (why a choice was made; options considered and rejected), distinct from the supersession lineage.
+- **`attribution`** block on factlets ([RFC 0011](rfcs/0011-attribution.md)) — splits `produced_by` (the agent that generated the claim) from `authority` (the role accountable for it).
+
+The organizational-layer model — `layer_type`, `precedence_rank`, supersession-at-read-time — is defined in [RFC 0007](rfcs/0007-factbook-layers.md). Software-profile field additions `applies_to` ([RFC 0008](rfcs/0008-applicability-selector.md)) and `verify` ([RFC 0009](rfcs/0009-verifiable-assertions.md)) live in the software-engineering profile, not the base spec. How a base schema and a profile schema combine for validation (and the open-vs-closed-world question that interacts with §9.3 round-trip preservation) is left to a dedicated schema-composition RFC; this change adds the field definitions only.

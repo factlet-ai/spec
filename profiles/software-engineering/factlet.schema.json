@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://factlet.ai/schema/profiles/software-engineering/v0.2/factlet.schema.json",
-  "title": "Software Engineering Profile \u2014 Factlet schema additions",
+  "title": "Software Engineering Profile — Factlet schema additions",
   "description": "Profile-specific factlet field constraints layered on top of the base factlet schema.",
   "type": "object",
   "properties": {
@@ -14,6 +14,207 @@
         "runtime"
       ],
       "description": "Software lifecycle phase. Omitted = phase-agnostic (relevant across phases)."
+    },
+    "applies_to": {
+      "type": "object",
+      "description": "RFC 0008 — applicability selector. A conjunction of optional dimensions; an omitted dimension is unconstrained on that axis. Declared ONCE at the factlet top level (NOT nested inside verify). A selector, not a verdict: gates which checks run, never contributes to a verdict.",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "gitignore-style globs over repo-relative POSIX paths; '!'-prefixed entries are exclusions."
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "linguist-style language identifiers; case-insensitive match."
+        },
+        "frameworks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "framework identifiers; case-insensitive match."
+        }
+      },
+      "additionalProperties": false
+    },
+    "verify": {
+      "type": "object",
+      "description": "RFC 0009 — the oracle: how to machine-check the factlet's claim. Exactly one of assertion/test_ref/examples is present and matches kind.",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "assertion",
+            "test_ref",
+            "examples"
+          ],
+          "description": "Selects the form of the oracle."
+        },
+        "assertion": {
+          "type": "object",
+          "properties": {
+            "expr": {
+              "type": "string",
+              "description": "Restricted, side-effect-free boolean expression."
+            },
+            "vars": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "Declared inputs mapped to their type names."
+            }
+          },
+          "required": [
+            "expr"
+          ],
+          "additionalProperties": false
+        },
+        "test_ref": {
+          "type": "object",
+          "properties": {
+            "runner": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "selector": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "runner",
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "given": {
+                "type": "object"
+              },
+              "expect": {
+                "type": "object"
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "given",
+              "expect"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "boundary": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Human-named boundary/edge conditions the check is known to exercise. Advisory; an uncovered boundary routes to NEEDS-REVIEW, never a silent PASS."
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "assertion"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "assertion"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "test_ref"
+                  ]
+                },
+                {
+                  "required": [
+                    "examples"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "test_ref"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "test_ref"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "assertion"
+                  ]
+                },
+                {
+                  "required": [
+                    "examples"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "examples"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "examples"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "assertion"
+                  ]
+                },
+                {
+                  "required": [
+                    "test_ref"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
     }
   }
 }
