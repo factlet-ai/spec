@@ -1,8 +1,8 @@
-# Factlet Protocol — v0.1 Specification
+# Factlet Protocol — v0.2 Specification
 
 **Status**: Draft
-**Version**: v0.1
-**Last updated**: 2026-05-04
+**Version**: v0.2
+**Last updated**: 2026-06-02
 **Editor**: Mihir Choudhary <mihir@kernora.ai>
 **License**: MIT
 
@@ -232,6 +232,18 @@ These were explicitly unresolved in v0.1; status updated as v0.2 RFCs land:
 - ~~Cross-Factbook references (when one team's factlet should reference another team's).~~ **Resolved by [RFC 0004](rfcs/0004-composable-factbooks-via-dependencies.md).**
 - ~~Domain-specific factlet vocabulary (software vs manufacturing vs healthcare).~~ **Resolved by [RFC 0002](rfcs/0002-profiles-mechanism.md) — Profiles mechanism.** First registered profile: software-engineering, see [RFC 0005](rfcs/0005-software-profile-phase-enum.md).
 - ~~Provenance of the factlet record itself (vs the underlying claim).~~ **Resolved by [RFC 0003](rfcs/0003-origination-provenance-block.md) — Origination block.**
+
+v0.2 additionally ratified, beyond the originally-listed questions:
+
+- ~~Organizational layering, precedence, and supersession-at-read-time.~~ **Resolved by [RFC 0007](rfcs/0007-factbook-layers.md).**
+- ~~Applicability selection — which artifacts a factlet governs.~~ **Resolved by [RFC 0008](rfcs/0008-applicability-selector.md) — `applies_to`.**
+- ~~Machine-verifiable factlets (oracles).~~ **Resolved by [RFC 0009](rfcs/0009-verifiable-assertions.md) — `verify`.**
+- ~~Decision rationale and rejected alternatives.~~ **Resolved by [RFC 0010](rfcs/0010-rationale-alternatives.md).**
+- ~~Producer vs accountable authority.~~ **Resolved by [RFC 0011](rfcs/0011-attribution.md) — `attribution`.**
+- ~~Base + profile schema composition and validation levels (open-vs-closed-world).~~ **Resolved by [RFC 0013](rfcs/0013-schema-composition-validation-levels.md).**
+
+Still open:
+
 - Factlet revocation semantics (vs supersession). Open.
 - Multi-tenancy model for shared Factbooks. Open.
 - Streaming retrieval API for very large Factbooks. Open.
